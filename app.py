@@ -1,5 +1,4 @@
 import requests
-import time
 from dotenv import load_dotenv
 import os
 
@@ -14,13 +13,7 @@ def shorten_url(input_url):
         'key': api_key
     }
 
-    # Measure response time
-    start_time = time.time()
     response = requests.get(api_url, params=params)
-    response_time = time.time() - start_time
-
-    # Print the response time
-    print("Response Time:", response_time)
 
     # Check if the request was successful
     if response.status_code == 200:
@@ -29,12 +22,10 @@ def shorten_url(input_url):
         # Check API response status for URL shortening success
         if data['url']['status'] == 7:
             print("Shortened URL:", data['url']['shortLink'])
-        elif data['url']['status'] == 1:
-            print("Error: Invalid URL. Please enter a valid URL.")
         else:
-            print("Error:", data['url']['status'], "Please try again!")
+            print("Error:", data['url']['status'], "Please make sure the link entered is correct and try again!")
     else:
-        print("Error:", response.status_code, "Please try again!")
+        print("Error:", response.status_code, "Please make sure the link entered is correct and try again!")
 
 if __name__ == "__main__":
     input_url = input("Please enter a URL below: ")
