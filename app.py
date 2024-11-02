@@ -1,68 +1,41 @@
 import requests
+import time
 from dotenv import load_dotenv
 import os
+
+# Load API key once at the beginning
 load_dotenv()
+api_key = os.getenv('API_KEY')
+api_url = 'https://cutt.ly/api/api.php'
 
-# Function to check if a URL exists
-def check_url_exists(url):
-    
-    # Try sending a HEAD request to check the URL status
-    try:      
-        response = requests.head(url) 
-        
-        # Check if the URL exists based on response status
-        if response.status_code == 200:  
-            return True    
-        else:
-            return False
-        
-    # Error occurred, URL may not exist or unreachable
-    except Exception:
-        return False
+def shorten_url(input_url):
+    params = {
+        'short': input_url,
+        'key': api_key
+    }
 
-# Main function
-def main():
-    
-    # API key and url for the URL shortening service
-    api_key = os.getenv('API_KEY')
-    api_url = 'https://cutt.ly/api/api.php'
-    
-    # Asking user to input a URL
-    input_url = input("Please enter a URL below: ")
-    
-    # Checking if the entered URL exists
-    if check_url_exists(input_url):
-        
-        # Parameters for the API request
-        params = {
-            'short' : input_url,
-            'key' : api_key
-        } 
-        
-        # Sending a GET request to shorten the URL
-        response = requests.get(api_url, params=params)
-        
-        # Parsing response data as JSON
+    # Measure response time
+    start_time = time.time()
+    response = requests.get(api_url, params=params)
+    response_time = time.time() - start_time
+
+    # Print the response time
+    print("Response Time:", response_time)
+
+    # Check if the request was successful
+    if response.status_code == 200:
         data = response.json()
         
-        # Checking if request was successful
-        if response.status_code == 200:
-            
-            data = response.json()
-            
-            # Checking if URL was successfully shortened
-            if data['url']['status'] == 7:
-                print("Shortened URL:", data['url']['shortLink'])
-            
-            else:
-                print("Error:", data['url']['status'], "Please try again!")
-                
+        # Check API response status for URL shortening success
+        if data['url']['status'] == 7:
+            print("Shortened URL:", data['url']['shortLink'])
+        elif data['url']['status'] == 1:
+            print("Error: Invalid URL. Please enter a valid URL.")
         else:
-            print("Error:", response.status_code, "Please try again!")
-            
+            print("Error:", data['url']['status'], "Please try again!")
     else:
-        print("URL does not exist or is unreachable.")
-
+        print("Error:", response.status_code, "Please try again!")
 
 if __name__ == "__main__":
-    main()
+    input_url = input("Please enter a URL below: ")
+    shorten_url(input_url)
